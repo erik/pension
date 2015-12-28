@@ -50,6 +50,10 @@ def send(data, config):
         'email': notify_email,
     }
 
+    # Don't notify unless there's actually something wrong
+    if not len(data['instances']):
+        return
+
     data['instances'] = cleanup_statuses(data['instances'])
 
     for key, fcn in notify_fcns.iteritems():
@@ -66,10 +70,6 @@ def notify_json(data, config):
 
 
 def notify_slack(data, config):
-    # Don't spam slack if there's nothing wrong
-    if not len(data['instances']):
-        return
-
     instances = ', '.join(data['instances'].keys())
     post_data = {
         'text': '!!! %d instance(s) have an issue: %s' % (
