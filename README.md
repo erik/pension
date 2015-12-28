@@ -1,2 +1,2 @@
 # pension
-Alert when ec2 instances are scheduled for retirement
+:tada: check for ec2 instances scheduled for retirement or maintenance events.

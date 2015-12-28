@@ -8,18 +8,25 @@ import toml
 import notify
 
 
-def get_instance_statuses(config):
-    profile_name = config['aws'].get('profile', 'default')
+def get_profiles(config):
+    if 'aws_profiles' not in config:
+        return {
+            'default': Session().client('ec2')
+        }
 
-    session = Session(profile_name=profile_name)
-    client = session.client('ec2')
+    return {
+        prof: Session(profile_name=prof).client('ec2')
+        for prof in config['aws_profiles']
+    }
 
+
+def get_instance_statuses(ec2_client, config):
     def _filter(filters):
         _statuses = []
         next_token = ''
 
         while True:
-            res = client.describe_instance_status(
+            res = ec2_client.describe_instance_status(
                 Filters=[
                     {'Name': k, 'Values': v}
                     for k, v in filters.iteritems()
@@ -76,14 +83,23 @@ def main(dry_run, config, quiet):
         click.echo('No config file found!')
         return -1
 
-    statuses = get_instance_statuses(config)
+    data = {
+        'instances': [],
+        'profiles': {}
+    }
 
-    click.echo('%d instance(s) have reported issues' % len(statuses))
+    for prof, ec2_client in get_profiles(config).iteritems():
+        statuses = get_instance_statuses(ec2_client, config)
+
+        data['profiles'][prof] = [s['InstanceId'] for s in statuses]
+        data['instances'].extend(statuses)
+
+    click.echo('%d instance(s) have reported issues' % len(data['instances']))
 
     if dry_run:
         config['notify'] = {} if quiet else {'json': {}}
 
-    notify.send(statuses, config['notify'])
+    notify.send(data, config['notify'])
 
 
 if __name__ == '__main__':
