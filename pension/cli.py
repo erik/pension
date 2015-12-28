@@ -36,16 +36,16 @@ def get_instance_statuses(config):
 
         return _statuses
 
-    statuses = []
-
     # describe_instance_status is an AND of filters, we want an OR
-    statuses.extend(_filter({'event.code': ['*']}))
-    statuses.extend(_filter({'instance-status.status': ['impaired']}))
-    statuses.extend(_filter({'instance-status.reachability': ['failed']}))
-    statuses.extend(_filter({'system-status.status': ['impaired']}))
-    statuses.extend(_filter({'system-status.reachability': ['failed']}))
+    statuses = set(
+        _filter({'event.code': ['*']}) +
+        _filter({'instance-status.status': ['impaired']}) +
+        _filter({'instance-status.reachability': ['failed']}) +
+        _filter({'system-status.status': ['impaired']}) +
+        _filter({'system-status.reachability': ['failed']})
+    )
 
-    return statuses
+    return list(statuses)
 
 
 def get_config(config_file):
