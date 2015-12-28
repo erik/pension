@@ -44,15 +44,21 @@ def get_instance_statuses(ec2_client, config):
         return _statuses
 
     # describe_instance_status is an AND of filters, we want an OR
-    statuses = set(
-        _filter({'event.code': ['*']}) +
-        _filter({'instance-status.status': ['impaired']}) +
-        _filter({'instance-status.reachability': ['failed']}) +
-        _filter({'system-status.status': ['impaired']}) +
-        _filter({'system-status.reachability': ['failed']})
-    )
+    seen = set()
+    results = [
+        _filter({'event.code': ['*']}),
+        _filter({'instance-status.status': ['impaired']}),
+        _filter({'instance-status.reachability': ['failed']}),
+        _filter({'system-status.status': ['impaired']}),
+        _filter({'system-status.reachability': ['failed']}),
+    ]
 
-    return list(statuses)
+    statuses = []
+    for instances in results:
+        statuses.extend([i for i in instances if i['InstanceId'] not in seen])
+        seen.update([i['InstanceId'] for i in instances])
+
+    return statuses
 
 
 def get_config(config_locations):
