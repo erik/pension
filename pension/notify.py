@@ -106,7 +106,7 @@ def notify_email(data, config):
         num_instances=len(data['instances']),
         profile_counts='\n'.join([
             '- %s: %s' % (name, ', '.join(inst))
-            for name, inst in data['profiles']
+            for name, inst in data['profiles'].iteritems()
         ]),
         details=json.dumps(data, indent=4, sort_keys=True, default=json_serialize)
     )
