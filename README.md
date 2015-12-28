@@ -22,6 +22,9 @@ If not provided, pension will try `./pension.toml` and `~/.pension.toml`.
 If no config file is available, pension will try to proceed using only AWS
 environment variables and the JSON console output.
 
+For more information on AWS credentials, refer to the
+[boto3 documentation](http://boto3.readthedocs.org/en/latest/guide/configuration.html).
+
 #### example `pension.toml`
 
 ```toml
