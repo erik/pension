@@ -67,14 +67,19 @@ def notify_slack(data, config):
         return
 
     instances = ', '.join(data['instances'].keys())
-    text = "!!! %d instance(s) have an issue: %s" % (
-        len(data['instances']), instances)
+    post_data = {
+        'text': '!!! %d instance(s) have an issue: %s' % (
+            len(data['instances']), instances)
+    }
 
-    res = requests.post(config['hook_url'], json={
-        'username': config.get('username', 'Pension Bot'),
-        'channel': config['channel'],
-        'text': text
-    })
+    # Add in the optional keys
+    if 'user_name' in config:
+        post_data['username'] = config['user_name']
+
+    if 'channel' in config:
+        post_data['channel'] = config['channel']
+
+    res = requests.post(config['hook_url'], json=post_data)
 
     print 'Uh oh: ', res.text
 
