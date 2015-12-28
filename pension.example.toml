@@ -1,5 +1,4 @@
 aws_profiles = ["default"]
-coalesce = false
 
 [notify.slack]
 hook_url = "https://hooks.slack.com/..."
