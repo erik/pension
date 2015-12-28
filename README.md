@@ -2,7 +2,7 @@
 
 > Plan for your instances' retirement.
 
-## config
+<hr />
 
 pension uses [toml](https://github.com/mojombo/toml) as its configuration
 language. The config file can be specified on the command line via `--config`.

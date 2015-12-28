@@ -47,7 +47,6 @@ def notify_json(data, config):
     if 'file' in config:
         with open(config['file'], 'w') as fp:
             json.dump(data, fp, indent=4, sort_keys=True)
-
     else:
         print json.dumps(data, indent=4, sort_keys=True)
 
