@@ -72,7 +72,7 @@ def notify_json(data, config):
 def notify_slack(data, config):
     instances = ', '.join(data['instances'].keys())
     post_data = {
-        'text': '!!! %d instance(s) have an issue: %s' % (
+        'text': '%d instance(s) have an issue: %s' % (
             len(data['instances']), instances)
     }
 
