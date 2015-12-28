@@ -10,7 +10,7 @@ If not provided, pension will try `./pension.toml` and `~/.pension.toml`.
 
 ```toml
 # (optional) profile names as configured in ~/.aws/credentials
-aws_profiles = ["default", ...]
+aws_profiles = ["dev", "prod"]
 
 # Enable notification via a slack message using webhooks.
 # Hooks can be setup here: https://my.slack.com/services/new/incoming-webhook/
@@ -26,7 +26,7 @@ username = "Bad News Bot"
 # (required)
 sender = "foo@bar.baz"
 # (required)
-recipients = ["oh@no.com", ...]
+recipients = ["oh@no.com", "alerts@myco.pagerduty.com"]
 # (optional)
 subject = "Oh no!"
 
