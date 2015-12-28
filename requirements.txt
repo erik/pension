@@ -1,5 +1,0 @@
-boto3==1.2.3
-click==6.2
-toml==0.9.1
-requests==2.9.1
-

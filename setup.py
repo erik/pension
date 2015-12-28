@@ -8,11 +8,16 @@ setup(
     author='Erik Price',
     url='https://github.com/erik/pension',
     packages=['pension'],
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'pension = pension.cli:main',
         ],
     },
     license='MIT',
-    install_requires=open('requirements.txt').readlines()
+    install_requires=[
+        'boto3==1.2.3',
+        'click==6.2',
+        'toml==0.9.1',
+        'requests==2.9.1'
+    ]
 )
