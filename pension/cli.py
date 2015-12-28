@@ -55,14 +55,12 @@ def get_instance_statuses(ec2_client, config):
     return list(statuses)
 
 
-def get_config(config_file):
-    config_locations = [config_file, 'pension.toml', '~/.pension.toml']
-
+def get_config(config_locations):
     for loc in config_locations:
         file_name = os.path.expanduser(loc)
 
         if os.path.exists(file_name):
-            click.echo('using config %s' % file_name)
+            click.echo('using config %s' % file_name, err=True)
 
             with open(file_name) as fp:
                 return toml.loads(fp.read())
@@ -73,20 +71,19 @@ def get_config(config_file):
 @click.option('--config', required=False, help='Configuration file location')
 @click.option('--quiet', '-q', is_flag=True, help='Disables default JSON output')
 def main(dry_run, config, quiet):
+    config_names = [config] if config else ['pension.toml', '~/.pension.toml']
+
     try:
-        config = get_config(config or '')
+        config = get_config(config_names)
     except:
-        click.echo('Failed to parse config')
+        click.echo('Failed to parse config', err=True)
         return -1
 
     if config is None:
-        click.echo('No config file found!')
-        return -1
+        click.echo('No usable config file, trying environment vars', err=True)
+        config = {'notify': {'json': {}}}
 
-    data = {
-        'instances': [],
-        'profiles': {}
-    }
+    data = {'instances': [], 'profiles': {}}
 
     for prof, ec2_client in get_profiles(config).iteritems():
         statuses = get_instance_statuses(ec2_client, config)

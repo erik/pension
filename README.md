@@ -8,8 +8,12 @@ pension uses [toml](https://github.com/mojombo/toml) as its configuration
 language. The config file can be specified on the command line via `--config`.
 If not provided, pension will try `./pension.toml` and `~/.pension.toml`.
 
+If no config file is available, pension will try to proceed using only AWS
+environment variables and the JSON console output.
+
 ```toml
-# (optional) profile names as configured in ~/.aws/credentials
+# (optional) profile names as configured in ~/.aws/credentials, defaults to
+#            using boto's AWS environment variables.
 aws_profiles = ["dev", "prod"]
 
 # Enable notification via a slack message using webhooks.
