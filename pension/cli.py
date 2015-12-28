@@ -97,7 +97,8 @@ def main(dry_run, config, quiet):
         data['profiles'][prof] = [s['InstanceId'] for s in statuses]
         data['instances'].extend(statuses)
 
-    click.echo('%d instance(s) have reported issues' % len(data['instances']))
+    click.echo('%d instance(s) have reported issues' % len(data['instances']),
+               err=True)
 
     if dry_run:
         config['notify'] = {} if quiet else {'json': {}}
