@@ -1,4 +1,8 @@
+import email
 import json
+import smtplib
+
+from email.MIMEText import MIMEText
 
 import requests
 
@@ -80,9 +84,39 @@ def notify_slack(data, config):
         post_data['channel'] = config['channel']
 
     res = requests.post(config['hook_url'], json=post_data)
+    res.raise_for_status()
 
-    print 'Uh oh: ', res.text
 
+def notify_email(data, config):
 
-def notify_email(statuses, config):
-    pass
+    msg_content = '''
+    {num_instances} EC2 instances currently have issues!
+    ========
+
+    By AWS profile:
+    --------
+
+    {profile_counts}
+
+    Full details:
+    --------
+
+    {details}
+    '''.format(
+        num_instances=len(data['instances']),
+        profile_counts='\n'.join([
+            '- %s: %s' % (name, ', '.join(inst))
+            for name, inst in data['profiles']
+        ]),
+        details=json.dumps(data, indent=4, sort_keys=True, default=json_serialize)
+    )
+
+    msg = MIMEText(msg_content, 'plain')
+    msg['Subject'] = config['subject']
+    msg['From'] = config.get('sender', config['user_name'])
+    msg['To'] = ', '.join(config['recipients'])
+
+    smtp = smtplib.SMTP_SSL(config['server'])
+    smtp.login(config['user_name'], config['password'])
+    smtp.sendmail(config['sender'], config['recipients'], msg.as_string())
+    smtp.close()
