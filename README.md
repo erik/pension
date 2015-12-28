@@ -7,6 +7,11 @@ other maintenance events that could cause (or be the source of) issues down the
 line. It is meant to be run periodically (in a cron or some such) and provide
 some warning before bad things happen.
 
+Currently, pension knows how to ping a slack channel or send an email when
+something's broken. Additional notification methods are welcome contributions.
+Otherwise, parsing the JSON output format should be flexible enough for any
+internal notification tooling.
+
 ### usage
 
 `pip install pension`
@@ -40,15 +45,22 @@ hook_url = "https://hooks.slack.com/..."
 # (optional) defaults to channel configured with webhook
 channel = "#general"
 # (optional) defaults to name configured with webhook
-username = "Bad News Bot"
+user_name = "Bad News Bot"
 
+# Sends an email using SMTP
 [notify.email]
 # (required)
+server = "smtp.gmail.com"
+# (required) login user name
+user_name = "foobar@gmail.com"
+# (required)
+password = "hunter2"
+# (optional) defaults to the given user_name
 sender = "foo@bar.baz"
 # (required)
 recipients = ["oh@no.com", "alerts@myco.pagerduty.com"]
-# (optional)
-subject = "Oh no!"
+# (required)
+subject = "Maintenance events detected for ec2 instances!"
 
 [notify.json]
 # (optional) file to write to. if not provided, will dump to stdout
