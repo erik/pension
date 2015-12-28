@@ -3,6 +3,16 @@ import json
 import requests
 
 
+def json_serialize(obj):
+    """handle datetime objects"""
+
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+    else:
+        raise TypeError, 'Object of type %s with value of %s is not JSON \
+serializable' % (type(obj), repr(obj))
+
+
 def cleanup_statuses(statuses):
     """Downcase keys and only include relevant items"""
 
@@ -46,9 +56,9 @@ def send(data, config):
 def notify_json(data, config):
     if 'file' in config:
         with open(config['file'], 'w') as fp:
-            json.dump(data, fp, indent=4, sort_keys=True)
+            json.dump(data, fp, indent=4, sort_keys=True, default=json_serialize)
     else:
-        print json.dumps(data, indent=4, sort_keys=True)
+        print json.dumps(data, indent=4, sort_keys=True, default=json_serialize)
 
 
 def notify_slack(data, config):
