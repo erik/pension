@@ -11,16 +11,18 @@ import notify
 def get_profiles(config):
     if 'aws_profiles' not in config:
         return {
-            'default': Session().client('ec2')
+            'default': Session()
         }
 
     return {
-        prof: Session(profile_name=prof).client('ec2')
+        prof: Session(profile_name=prof)
         for prof in config['aws_profiles']
     }
 
 
-def get_instance_statuses(ec2_client, config):
+def get_instance_statuses(session, config):
+    ec2_client = session.client('ec2')
+
     def _filter(filters):
         _statuses = []
         next_token = ''
@@ -91,10 +93,13 @@ def main(dry_run, config, quiet):
 
     data = {'instances': [], 'profiles': {}}
 
-    for prof, ec2_client in get_profiles(config).iteritems():
-        statuses = get_instance_statuses(ec2_client, config)
+    for prof, session in get_profiles(config).iteritems():
+        statuses = get_instance_statuses(session, config)
 
-        data['profiles'][prof] = [s['InstanceId'] for s in statuses]
+        data['profiles'][prof] = {
+            'region': session._session.get_config_variable('region'),
+            'instances': [s['InstanceId'] for s in statuses]
+        }
         data['instances'].extend(statuses)
 
     click.echo('%d instance(s) have reported issues' % len(data['instances']),

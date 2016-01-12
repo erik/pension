@@ -70,10 +70,18 @@ def notify_json(data, config):
 
 
 def notify_slack(data, config):
-    instances = ', '.join(data['instances'].keys())
+    console_url = '<https://{region}.console.aws.amazon.com/ec2/v2/home?\
+region={region}#Instances:search={instance}|{instance}>'
+
+    instance_links = [
+        console_url.format(region=profile['region'], instance=inst)
+        for profile in data['profiles'].values()
+        for inst in profile['instances']
+    ]
+
     post_data = {
         'text': '%d instance(s) have an issue: %s' % (
-            len(data['instances']), instances)
+            len(data['instances']), ', '.join(instance_links))
     }
 
     # Add in the optional keys
@@ -105,8 +113,8 @@ def notify_email(data, config):
     '''.format(
         num_instances=len(data['instances']),
         profile_counts='\n'.join([
-            '- %s: %s' % (name, ', '.join(inst))
-            for name, inst in data['profiles'].iteritems()
+            '- [%s] %s: %s' % (data['region'], name, ', '.join(data['instances']))
+            for name, data in data['profiles'].iteritems()
         ]),
         details=json.dumps(data, indent=4, sort_keys=True, default=json_serialize)
     )
