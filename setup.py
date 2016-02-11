@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='pension',
-    version='0.0.2',
+    version='0.0.3',
     description='Alert when ec2 instances are scheduled for retirement',
     author='Erik Price',
     url='https://github.com/erik/pension',
