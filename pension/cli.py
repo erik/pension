@@ -38,7 +38,7 @@ def get_instance_statuses(ec2_client, config):
             # We don't care about completed events. Thanks amazon for this
             # wonderful API.
             active_events = [
-                event
+                status
                 for status in res['InstanceStatuses']
                 for event in status['Events']
                 if not event['Description'].startswith('[Completed]')
@@ -46,7 +46,7 @@ def get_instance_statuses(ec2_client, config):
 
             # Don't alert if we don't have any active events
             if len(active_events):
-                _statuses.extend(res['InstanceStatuses'])
+                _statuses.extend(active_events)
                 next_token = res.get('NextToken')
 
             if not next_token:
