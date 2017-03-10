@@ -43,7 +43,7 @@ def cleanup_statuses(statuses):
     return info
 
 
-def send(data, config):
+def send(data, inst_map, config):
     notify_fcns = {
         'json': notify_json,
         'slack': notify_slack,
@@ -58,10 +58,10 @@ def send(data, config):
 
     for key, fcn in notify_fcns.iteritems():
         if key in config:
-            fcn(data, config[key])
+            fcn(data, inst_map, config[key])
 
 
-def notify_json(data, config):
+def notify_json(data, inst_map, config):
     if 'file' in config:
         with open(config['file'], 'w') as fp:
             json.dump(data, fp, indent=4, sort_keys=True, default=json_serialize)
@@ -69,14 +69,23 @@ def notify_json(data, config):
         print json.dumps(data, indent=4, sort_keys=True, default=json_serialize)
 
 
-def notify_slack(data, config):
-    console_url = '<https://{region}.console.aws.amazon.com/ec2/v2/home?\
-region={region}#Instances:search={instance}|{instance}>'
+def notify_slack(data, inst_map, config):
+    console_url = '{inst_name} (<https://{region}.console.aws.amazon.com/ec2/v2/home?\
+region={region}#Instances:search={instance}|{instance}>)'
+
+    # This is kind of a gross API.
+    tags = {
+        inst_id: {t['Key']: t['Value'] for t in inst.tags}
+        for inst_id, inst in inst_map.iteritems()
+    }
 
     instance_links = [
-        console_url.format(region=profile['region'], instance=inst)
+        console_url.format(
+            region=profile['region'],
+            instance=inst_id,
+            inst_name=tags[inst_id].get('Name', 'unnamed'))
         for profile in data['profiles'].values()
-        for inst in profile['instances']
+        for inst_id in profile['instances']
     ]
 
     post_data = {
@@ -95,7 +104,7 @@ region={region}#Instances:search={instance}|{instance}>'
     res.raise_for_status()
 
 
-def notify_email(data, config):
+def notify_email(data, inst_map, config):
 
     msg_content = '''
     {num_instances} EC2 instances currently have issues!
