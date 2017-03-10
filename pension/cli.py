@@ -20,9 +20,7 @@ def get_profiles(config):
     }
 
 
-def get_instance_statuses(session, config):
-    ec2_client = session.client('ec2')
-
+def get_instance_statuses(ec2_client, config):
     def _filter(filters):
         _statuses = []
         next_token = ''
@@ -103,9 +101,13 @@ def main(dry_run, config, quiet):
         config = {'notify': {'json': {}}}
 
     data = {'instances': [], 'profiles': {}}
+    instance_map = {}
 
     for prof, session in get_profiles(config).iteritems():
-        statuses = get_instance_statuses(session, config)
+        ec2_client = session.client('ec2')
+        ec2 = session.resource('ec2')
+
+        statuses = get_instance_statuses(ec2_client, config)
 
         data['profiles'][prof] = {
             'region': session._session.get_config_variable('region'),
@@ -113,13 +115,23 @@ def main(dry_run, config, quiet):
         }
         data['instances'].extend(statuses)
 
+        # Keep track of boto ec2 instances
+        instances = ec2.instances.filter(InstanceIds=[
+            s['InstanceId'] for s in statuses
+        ])
+
+        instance_map.update({
+            statuses[i]['InstanceId']: inst
+            for i, inst in enumerate(instances)
+        })
+
     click.echo('%d instance(s) have reported issues' % len(data['instances']),
                err=True)
 
     if dry_run:
         config['notify'] = {} if quiet else {'json': {}}
 
-    notify.send(data, config['notify'])
+    notify.send(data, instance_map, config['notify'])
 
 
 if __name__ == '__main__':
