@@ -118,13 +118,13 @@ def main(dry_run, config, quiet):
 
         if statuses:
             # Keep track of boto ec2 instances
-            instances = ec2.instances.filter(InstanceIds=[
+            instance_list = ec2.instances.filter(InstanceIds=[
                 s['InstanceId'] for s in statuses
             ])
 
             instance_map.update({
-                statuses[i]['InstanceId']: inst
-                for i, inst in enumerate(instances)
+                i.instance_id: i
+                for i in instance_list
             })
 
     click.echo('%d instance(s) have reported issues' % len(data['instances']),
