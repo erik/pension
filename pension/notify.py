@@ -1,3 +1,5 @@
+# -*- coding: utf-8; -*-
+
 import email
 import json
 import smtplib
@@ -70,8 +72,8 @@ def notify_json(data, inst_map, config):
 
 
 def notify_slack(data, inst_map, config):
-    console_url = '{inst_name} (<https://{region}.console.aws.amazon.com/ec2/v2/home?\
-region={region}#Instances:search={instance}|{instance}>)'
+    console_url = '<https://{region}.console.aws.amazon.com/ec2/v2/home?\
+region={region}#Instances:search={instance}|{instance}>: `{inst_name}` {events}'
 
     # This is kind of a gross API.
     tags = {
@@ -79,18 +81,34 @@ region={region}#Instances:search={instance}|{instance}>)'
         for inst_id, inst in inst_map.iteritems()
     }
 
+    event_descriptions = {}
+
+    for inst_id, status in data['instances'].iteritems():
+        events = []
+
+        for event in status.get('events', []):
+            desc = event.get('Description')
+            start = event.get('NotBefore')
+
+            events.append('%s%s' % (desc, start.strftime('%m/%d %H:%M')))
+
+        if events:
+            event_descriptions[inst_id] = ';'.join(events)
+
     instance_links = [
         console_url.format(
             region=profile['region'],
             instance=inst_id,
-            inst_name=tags[inst_id].get('Name', 'unnamed'))
+            inst_name=tags[inst_id].get('Name', 'unnamed'),
+            events=event_descriptions.get(inst_id, '')
+        )
         for profile in data['profiles'].values()
         for inst_id in profile['instances']
     ]
 
     post_data = {
-        'text': '%d instance(s) have an issue: %s' % (
-            len(data['instances']), ', '.join(instance_links))
+        'text': '%d instance(s) have an issue: \n • %s' % (
+            len(data['instances']), '\n • '.join(instance_links))
     }
 
     # Add in the optional keys
