@@ -77,7 +77,7 @@ region={region}#Instances:search={instance}|{instance}>: `{inst_name}` {events}'
 
     # This is kind of a gross API.
     tags = {
-        inst_id: {t['Key']: t['Value'] for t in inst.tags}
+        inst_id: {t['Key']: t['Value'] for t in (inst.tags or [])}
         for inst_id, inst in inst_map.iteritems()
     }
 
