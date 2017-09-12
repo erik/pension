@@ -41,7 +41,7 @@ def get_instance_statuses(ec2_client, config):
             active_events = [
                 status
                 for status in res['InstanceStatuses']
-                for event in status.get('Events')
+                for event in status.get('Events', [])
                 if not event['Description'].startswith('[Completed]')
             ]
 
